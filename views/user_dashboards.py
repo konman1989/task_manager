@@ -18,6 +18,7 @@ class UserDashboards(Resource):
 
         db.session.add(d)
         db.session.flush()
+        d.users.append(User.query.get(user_id))
         id_ = d.id
         db.session.commit()
 

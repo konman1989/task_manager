@@ -35,14 +35,11 @@ class DashboardTasks(Resource):
     def get(self, dashboard_id):
         args = request.args.get('status')
         d = DashBoard.query.get(dashboard_id)
-        # tasks = Task.query.filter_by(dashboard_id=dashboard_id).all()
 
         if args is not None:
             if args == 'todo':
                 return [t.serialize() for t in d.tasks if
                         t.status == "TO DO"], 200
-                # return [t.serialize() for t in tasks if
-                #         t.status == "TO DO"], 200
             elif args == 'inprocess':
                 return [t.serialize() for t in d.tasks if
                         t.status == "IN PROCESS"], 200
@@ -51,7 +48,6 @@ class DashboardTasks(Resource):
                         t.status == "DONE"], 200
 
         return serialize_multiple(d.tasks), 200
-        # return [t.serialize() for t in tasks], 200
 
 
 class DashboardTaskUsers(Resource):

@@ -5,6 +5,7 @@ from views.dashboards import Dashboards, SingleDashboard, DashboardUsers, \
 from views.user_dashboards import UserDashboards, UserDashboardsDetailed, \
     UserTasks
 from views.user_tasks import UserTasksDetailed, UserTaskComments
+from views.tasks import TaskUsers, TaskComments
 
 api.add_resource(Users, '/users')
 api.add_resource(SingleUser, '/users/<int:user_id>')
@@ -17,6 +18,9 @@ api.add_resource(DashboardUsers, '/dashboards/<int:dashboard_id>/users')
 api.add_resource(DashboardTasks, '/dashboards/<int:dashboard_id>/tasks')
 api.add_resource(DashboardTaskUsers,
                  '/dashboards/<int:dashboard_id>/tasks/<int:task_id>/users')
+
+api.add_resource(TaskUsers, '/tasks/<int:task_id>/users')
+api.add_resource(TaskComments, '/tasks/<int:task_id>/comments')
 
 # ???????
 api.add_resource(UserDashboards, '/users/<int:user_id>/dashboards')
