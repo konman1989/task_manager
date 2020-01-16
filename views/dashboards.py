@@ -26,8 +26,11 @@ class SingleDashboard(Resource):
 class DashboardUsers(Resource):
 
     def get(self, dashboard_id):
-        d = DashBoard.query.get(dashboard_id)
-        return [u.serialize() for u in d.users], 200
+        try:
+            d = DashBoard.query.get(dashboard_id)
+            return [u.serialize() for u in d.users], 200
+        except AttributeError:
+            return "Not found", 404
 
 
 class DashboardTasks(Resource):
@@ -37,24 +40,22 @@ class DashboardTasks(Resource):
         d = DashBoard.query.get(dashboard_id)
 
         if args is not None:
-            if args == 'todo':
-                return [t.serialize() for t in d.tasks if
-                        t.status == "TO DO"], 200
-            elif args == 'inprocess':
-                return [t.serialize() for t in d.tasks if
-                        t.status == "IN PROCESS"], 200
-            elif args == 'done':
-                return [t.serialize() for t in d.tasks if
-                        t.status == "DONE"], 200
+            try:
+                if args == 'todo':
+                    return [t.serialize() for t in d.tasks if
+                            t.status == "TO DO"], 200
+                elif args == 'inprocess':
+                    return [t.serialize() for t in d.tasks if
+                            t.status == "IN PROCESS"], 200
+                elif args == 'done':
+                    return [t.serialize() for t in d.tasks if
+                            t.status == "DONE"], 200
+            except AttributeError:
+                return "Not found", 404
+        try:
+            return serialize_multiple(d.tasks), 200
+        except AttributeError:
+            return "Not found", 404
 
-        return serialize_multiple(d.tasks), 200
 
 
-class DashboardTaskUsers(Resource):
-
-    def get(self,  dashboard_id, task_id):
-        task = Task.query.get(task_id)
-
-        if task.id == dashboard_id:
-            return serialize_multiple(task.users), 200
-        return "Wrong dashboard or task does not exist", 409

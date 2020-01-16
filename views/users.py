@@ -13,7 +13,7 @@ class Users(Resource):
 
     def post(self):
         data = request.get_json()
-        return ModelValidator(User).post(**data)
+        return ModelValidator(User).post(data)
 
 
 class SingleUser(Resource):
@@ -35,13 +35,15 @@ class UserStats(Resource):
 
     def get(self, user_id):
         args = request.args.get('query')
-
-        if args is not None:
-            user = User.query.get(user_id)
-            if args == 'dashboards':
-                return [u.serialize() for u in user.dashboards], 200
-            elif args == 'tasks':
-                return [u.serialize() for u in user.tasks], 200
-            elif args == 'comments':
-                return [u.serialize() for u in user.comments], 200
-        return {}, 200
+        try:
+            if args is not None:
+                user = User.query.get(user_id)
+                if args == 'dashboards':
+                    return [u.serialize() for u in user.dashboards], 200
+                elif args == 'tasks':
+                    return [u.serialize() for u in user.tasks], 200
+                elif args == 'comments':
+                    return [u.serialize() for u in user.comments], 200
+            return {}, 200
+        except AttributeError:
+            return 'Not found', 404

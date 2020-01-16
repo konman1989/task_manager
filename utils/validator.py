@@ -20,13 +20,11 @@ class ModelValidator:
 
     def post(self, data):
         try:
-
-            model = self.model(data)
+            model = self.model(**data)
             db.session.add(model)
             db.session.flush()
-            id_ = self.model.id
+            id_ = model.id
             db.session.commit()
-
             return {"id": id_}, 201
         except TypeError:
             return "Wrong input", 400
@@ -37,7 +35,6 @@ class ModelValidator:
         try:
             db.session.query(self.model).filter_by(id=model_id).update(data)
             db.session.commit()
-
             return {}, 204
 
         except InvalidRequestError:
@@ -45,5 +42,6 @@ class ModelValidator:
 
         except IntegrityError:
             return "Either data already exists or wrong input", 409
+
 
 
