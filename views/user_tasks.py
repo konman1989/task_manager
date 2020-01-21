@@ -2,7 +2,10 @@ from flask import request
 from flask_restful import Resource
 
 from models import User, DashBoard, Task, Comment, serialize_multiple
+from services import init_task_creation
 from settings import db
+
+from sqlalchemy import and_
 
 
 class UserTasks(Resource):
@@ -19,16 +22,9 @@ class UserTasks(Resource):
         """Creates new task. Checks if a dashboard member"""
 
         data = request.get_json()
-        d = DashBoard.query.get(dashboard_id)
-
-        if d is None:
-            return 'Wrong input', 400
-        member = False
-
-        for u in d.users:
-            if u.id == user_id:
-                member = True
-                break
+        # checking if user_id in dashboard
+        member = DashBoard.query.join(User, DashBoard.users).filter(
+            and_(DashBoard.id == dashboard_id, User.id == user_id)).first()
 
         if member:
             try:
@@ -39,23 +35,23 @@ class UserTasks(Resource):
                 db.session.flush()
                 id_ = task.id
                 db.session.commit()
+
+                # sending a new task notification
+                init_task_creation(task.serialize())
+
                 return {"id": id_}, 201
             except TypeError:
                 return 'Wrong input', 400
-        return "Only dashboard members can operate tasks", 409
+        return "Either access is restricted or wrong dashboard", 409
 
 
 class UserTasksDetailed(Resource):
 
     def get(self, user_id, dashboard_id, task_id):
         task = Task.query.get(task_id)
-        d = DashBoard.query.get(dashboard_id)
-        member = False
-
-        for u in d.users:
-            if u.id == user_id:
-                member = True
-                break
+        # checking if user_id in dashboard
+        member = DashBoard.query.join(User, DashBoard.users).filter(
+            and_(DashBoard.id == dashboard_id, User.id == user_id)).first()
 
         if task.dashboard_id == dashboard_id and member:
             return task.serialize(), 200
@@ -81,18 +77,14 @@ class UserTasksDetailed(Resource):
         """Updates task details. Checks if the user is in the dashboard"""
 
         data = request.get_json()
-
-        d = DashBoard.query.get(dashboard_id)
-        member = False
-
-        for user in d.users:
-            if user.id == user_id:
-                member = True
-                break
+        # checking if user_id in dashboard
+        member = DashBoard.query.join(User, DashBoard.users).filter(
+            and_(DashBoard.id == dashboard_id, User.id == user_id)).first()
 
         if member:
             try:
                 task = db.session.query(Task).filter_by(id=task_id)
+
                 if data.get('admin_id') is not None and \
                         task.first().admin_id != data.get('admin_id') \
                         and user_id != task.first().admin_id:
@@ -100,6 +92,7 @@ class UserTasksDetailed(Resource):
 
                 if task.first().dashboard_id != dashboard_id:
                     return "Wrong dashboard", 409
+
                 task.update(data)
                 db.session.commit()
                 return {}, 204
@@ -112,13 +105,9 @@ class UserTaskComments(Resource):
 
     def get(self, user_id, dashboard_id, task_id):
         task = Task.query.get(task_id)
-        d = DashBoard.query.get(dashboard_id)
-        member = False
 
-        for user in d.users:
-            if user.id == user_id:
-                member = True
-                break
+        member = DashBoard.query.join(User, DashBoard.users).filter(
+            and_(DashBoard.id == dashboard_id, User.id == user_id)).first()
 
         if member and task.dashboard_id == dashboard_id:
             return [t.serialize() for t in task.comments], 200
@@ -128,15 +117,17 @@ class UserTaskComments(Resource):
     def post(self, user_id, dashboard_id, task_id):
         data = request.get_json()
         task = Task.query.get(task_id)
+        try:
+            if task.dashboard_id == dashboard_id:
+                for user in task.users:
+                    if user.id == user_id:
+                        c = Comment(sender_id=user_id, task_id=task_id, **data)
+                        db.session.add(c)
+                        db.session.flush()
+                        id_ = c.id
+                        db.session.commit()
 
-        if task.dashboard_id == dashboard_id:
-            for user in task.users:
-                if user.id == user_id:
-                    c = Comment(sender_id=user_id, task_id=task_id, **data)
-                    db.session.add(c)
-                    db.session.flush()
-                    id_ = c.id
-                    db.session.commit()
-
-                    return {'id': id_}, 200
-        return "Either access is restricted or wrong dashboard", 409
+                        return {'id': id_}, 200
+            return "Either access is restricted or wrong dashboard", 409
+        except AttributeError:
+            return 'Not found', 404

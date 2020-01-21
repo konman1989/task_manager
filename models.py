@@ -1,8 +1,6 @@
 from settings import db
 
 # TODO DELETE tasks, comments and users upon deleting a dashboard!
-# TODO create views
-# TODO create routs
 # TODO create validator
 # TODO solve issues adding a few same rows
 
