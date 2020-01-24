@@ -1,11 +1,10 @@
 from flask import request
 from flask_restful import Resource
+from sqlalchemy import and_
 
 from models import User, DashBoard, Task, Comment, serialize_multiple
-from services import init_task_creation
+from services import init_event_creation
 from settings import db
-
-from sqlalchemy import and_
 
 
 class UserTasks(Resource):
@@ -37,7 +36,7 @@ class UserTasks(Resource):
                 db.session.commit()
 
                 # sending a new task notification
-                init_task_creation(task.serialize())
+                init_event_creation('tasks', task.serialize())
 
                 return {"id": id_}, 201
             except TypeError:
@@ -115,19 +114,26 @@ class UserTaskComments(Resource):
         return "Either access is restricted or wrong dashboard", 409
 
     def post(self, user_id, dashboard_id, task_id):
+        """Only task members, task admin and dashboard admin can
+        leave comments"""
+
         data = request.get_json()
         task = Task.query.get(task_id)
+        d = DashBoard.query.get(dashboard_id)
+        member = Task.query.join(User, Task.users).filter(
+            and_(Task.id == task_id, User.id == user_id)).first()
+
         try:
             if task.dashboard_id == dashboard_id:
-                for user in task.users:
-                    if user.id == user_id:
-                        c = Comment(sender_id=user_id, task_id=task_id, **data)
-                        db.session.add(c)
-                        db.session.flush()
-                        id_ = c.id
-                        db.session.commit()
-
-                        return {'id': id_}, 200
+                if member or task.admin_id == user_id or d.id == user_id:
+                    c = Comment(sender_id=user_id, task_id=task_id, **data)
+                    db.session.add(c)
+                    db.session.flush()
+                    id_ = c.id
+                    db.session.commit()
+                    # sending a new comment notification
+                    init_event_creation('comments', c.serialize())
+                    return {'id': id_}, 200
             return "Either access is restricted or wrong dashboard", 409
         except AttributeError:
             return 'Not found', 404

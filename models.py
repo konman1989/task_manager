@@ -3,6 +3,8 @@ from settings import db
 # TODO DELETE tasks, comments and users upon deleting a dashboard!
 # TODO create validator
 # TODO solve issues adding a few same rows
+# TODO add process graphics
+
 
 dashboard_users = db.Table(
     "dashboard_users", db.Model.metadata,
