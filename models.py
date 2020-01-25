@@ -6,6 +6,12 @@ from settings import db
 # TODO add process graphics
 
 
+# project_users = db.Table(
+#     "project_users", db.Model.metadata,
+#     db.Column("user_id", db.Integer, db.ForeignKey("users.id")),
+#     db.Column("project_id", db.Integer, db.ForeignKey("projects.id"))
+# )
+
 dashboard_users = db.Table(
     "dashboard_users", db.Model.metadata,
     db.Column("user_id", db.Integer, db.ForeignKey("users.id")),
@@ -19,18 +25,31 @@ task_users = db.Table(
 )
 
 
+#
+# class Project(db.Model):
+#     __tablename__ = 'projects'
+#
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(32), nullable=False)
+#     description = db.Column(db.Text(1000))
+#     admin = db.Column(db.Integer, db.ForeignKey("users.id", nullable=False))
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(70), unique=True, nullable=False)
-    email = db.Column(db.String(70), unique=True, nullable=False)
+    username = db.Column(db.String(32), nullable=False)
+    email = db.Column(db.String(32), unique=True, nullable=False)
+    # chat_id = db.Column(db.Integer, unique=True)
 
-    comments = db.relationship("Comment", backref='author')
+    # projects = db.relationship('Project', secondary=project_users,
+    #                            backref=db.backref('users', lazy=True))
     dashboards = db.relationship('DashBoard', secondary=dashboard_users,
                                  backref=db.backref('users', lazy=True))
     tasks = db.relationship('Task', secondary=task_users,
                             backref=db.backref('users', lazy=True))
+    comments = db.relationship("Comment", backref='author')
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -51,6 +70,8 @@ class DashBoard(db.Model):
     admin = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     tasks = db.relationship('Task', backref='dashboard')
+
+    # admin_1 = db.relationship('User', backref='dashboard')
 
     def __repr__(self):
         return '<Dashboard %r>' % self.dashboard_name
@@ -86,7 +107,7 @@ class Task(db.Model):
             "name": self.task_name,
             "text": self.text,
             "admin": self.admin_id,
-            "dashboard": self.dashboard_id,
+            "dashboard": self.dashboard.dashboard_name,
             "created at": str(self.created_at),
             "status": self.status
         }
@@ -109,8 +130,8 @@ class Comment(db.Model):
         return {
             "id": self.id,
             "comment": self.text,
-            "sender": self.sender_id,
-            "task": self.task_id
+            "sender": self.author.username,
+            "task": self.task.task_name
         }
 
 
