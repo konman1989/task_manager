@@ -6,6 +6,8 @@ from models import User, DashBoard, Task, Comment, serialize_multiple
 from services import init_event_creation
 from settings import db
 
+# TODO user must be a dashboard user to be added to task, consider either
+# adding before or upon adding to task
 
 class UserTasks(Resource):
 
@@ -107,8 +109,9 @@ class UserTaskComments(Resource):
 
         member = DashBoard.query.join(User, DashBoard.users).filter(
             and_(DashBoard.id == dashboard_id, User.id == user_id)).first()
-
+        print(member)
         if member and task.dashboard_id == dashboard_id:
+            print([t.serialize() for t in task.comments])
             return [t.serialize() for t in task.comments], 200
 
         return "Either access is restricted or wrong dashboard", 409
