@@ -58,4 +58,15 @@ class DashboardTasks(Resource):
             return "Not found", 404
 
 
+class DashboardStats(Resource):
+
+    def get(self, dashboard_id):
+        d = DashBoard.query.get(dashboard_id)
+        tasks = serialize_multiple(d.tasks)
+        status = [t.get('status') for t in tasks]
+
+        return {'status': sorted(status)}
+
+
+
 

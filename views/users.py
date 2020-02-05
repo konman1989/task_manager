@@ -9,6 +9,13 @@ from settings import db
 class Users(Resource):
 
     def get(self):
+        args = request.args.get('email').lower()
+        if args is not None:
+            try:
+                return User.query.filter_by(email=args).first().serialize()
+            except AttributeError:
+                return "Not found", 404
+
         return ModelValidator(User).get()
 
     def post(self):
@@ -26,7 +33,7 @@ class SingleUser(Resource):
         return ModelValidator(User).patch_by_id(user_id, data)
 
     def delete(self, user_id):
-        db.session.query(User).filter_by(id=user_id).delete()
+        db.session.query(User).filter_by(chat_id=user_id).delete()
         db.session.commit()
         return {}, 200
 
@@ -47,3 +54,4 @@ class UserStats(Resource):
             return {}, 200
         except AttributeError:
             return 'Not found', 404
+

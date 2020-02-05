@@ -2,23 +2,23 @@ from flask import request
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
-from models import User, DashBoard, Task, serialize_multiple
+from models import User, DashBoard, serialize_multiple
 from settings import db
 
 
 class UserDashboards(Resource):
 
     def get(self, user_id):
+        """Returns dashboards list where user is admin"""
         try:
-            user = User.query.get(user_id)
-            return serialize_multiple(user.dashboards), 200
+            d = DashBoard.query.filter_by(admin=user_id).all()
+            return serialize_multiple(d)
         except AttributeError:
             return "Not found", 404
 
     def post(self, user_id):
         try:
             data = request.get_json()
-
             d = DashBoard(admin=user_id, **data)
 
             db.session.add(d)
