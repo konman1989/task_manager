@@ -1,7 +1,7 @@
 from settings import app, api
 from views.users import Users, SingleUser, UserStats
 from views.dashboards import Dashboards, SingleDashboard, DashboardUsers, \
-    DashboardTasks, DashboardStats
+    DashboardTasks, DashboardStats, DashboardUsersDetailed
 from views.user_dashboards import UserDashboards, UserDashboardsDetailed
 from views.user_tasks import UserTasksDetailed, UserTaskComments, UserTasks
 from views.tasks import Tasks, TaskUsers, TaskComments, TaskCommentsDetailed
@@ -13,6 +13,8 @@ api.add_resource(UserStats, '/users/<int:user_id>/data')
 api.add_resource(Dashboards, '/dashboards')
 api.add_resource(SingleDashboard, '/dashboards/<int:dashboard_id>')
 api.add_resource(DashboardUsers, '/dashboards/<int:dashboard_id>/users')
+api.add_resource(DashboardUsersDetailed,
+                 '/dashboards/<int:dashboard_id>/users/<int:user_id>')
 api.add_resource(DashboardTasks, '/dashboards/<int:dashboard_id>/tasks')
 api.add_resource(DashboardStats, '/dashboards/<int:dashboard_id>/data')
 

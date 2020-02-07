@@ -12,7 +12,8 @@ class Users(Resource):
         args = request.args.get('email')
         if args is not None:
             try:
-                return User.query.filter_by(email=args.lower()).first().serialize()
+                return User.query.filter_by(
+                    email=args.lower()).first().serialize()
             except AttributeError:
                 return "Not found", 404
 
@@ -54,4 +55,3 @@ class UserStats(Resource):
             return {}, 200
         except AttributeError:
             return 'Not found', 404
-

@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import Resource
 
-from models import DashBoard, serialize_multiple, Task
+from models import DashBoard, User, serialize_multiple
 from utils.validator import ModelValidator
 
 
@@ -31,6 +31,22 @@ class DashboardUsers(Resource):
             return [u.serialize() for u in d.users], 200
         except AttributeError:
             return "Not found", 404
+
+
+class DashboardUsersDetailed(Resource):
+
+    def delete(self, dashboard_id, user_id):
+        d = DashBoard.query.get(dashboard_id)
+        user = User.query.get(user_id)
+
+        try:
+            d.users.remove(user)
+            return {}, 200
+        except ValueError:
+            return 'Not found', 404
+        except AttributeError:
+            return "Either access is restricted or wrong dashboard", 409
+
 
 
 class DashboardTasks(Resource):

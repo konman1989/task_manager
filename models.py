@@ -66,7 +66,8 @@ class DashBoard(db.Model):
         return {
             "id": self.id,
             "name": self.dashboard_name,
-            "admin": self.admin_name.username
+            "admin": self.admin_name.username,
+            "admin_id": self.admin
         }
 
 
