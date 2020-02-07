@@ -3,6 +3,7 @@ from flask_restful import Resource
 
 from models import DashBoard, User, serialize_multiple
 from utils.validator import ModelValidator
+from settings import db
 
 
 class Dashboards(Resource):
@@ -36,11 +37,12 @@ class DashboardUsers(Resource):
 class DashboardUsersDetailed(Resource):
 
     def delete(self, dashboard_id, user_id):
-        d = DashBoard.query.get(dashboard_id)
         user = User.query.get(user_id)
 
         try:
+            d = db.session.query(DashBoard).filter_by(id=dashboard_id).first()
             d.users.remove(user)
+            db.session.commit()
             return {}, 200
         except ValueError:
             return 'Not found', 404
