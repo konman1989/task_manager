@@ -9,10 +9,10 @@ from settings import db
 class Users(Resource):
 
     def get(self):
-        args = request.args.get('email').lower()
+        args = request.args.get('email')
         if args is not None:
             try:
-                return User.query.filter_by(email=args).first().serialize()
+                return User.query.filter_by(email=args.lower()).first().serialize()
             except AttributeError:
                 return "Not found", 404
 

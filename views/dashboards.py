@@ -65,7 +65,7 @@ class DashboardStats(Resource):
         tasks = serialize_multiple(d.tasks)
         status = [t.get('status') for t in tasks]
 
-        return {'status': sorted(status)}
+        return {'status': status}
 
 
 

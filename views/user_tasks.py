@@ -7,10 +7,6 @@ from services import init_event_creation
 from settings import db
 
 
-# TODO user must be a dashboard user to be added to task, consider either
-# adding before or upon adding to task
-
-
 class UserTasks(Resource):
 
     def get(self, user_id, dashboard_id):
@@ -58,9 +54,12 @@ class UserTasksDetailed(Resource):
             and_(DashBoard.id == dashboard_id,
                  User.chat_id == user_id)).first()
 
-        if task.dashboard_id == dashboard_id and member:
-            return task.serialize(), 200
-        return "Either access is restricted or wrong dashboard", 409
+        try:
+            if task.dashboard_id == dashboard_id and member:
+                return task.serialize(), 200
+            return "Either access is restricted or wrong dashboard", 409
+        except AttributeError:
+            return "Not Found", 404
 
     def post(self, user_id, dashboard_id, task_id):
         """Adds a new user to the task. Checks if the initiator is dashboard
@@ -136,9 +135,11 @@ class UserTaskComments(Resource):
 
         member = DashBoard.query.join(User, DashBoard.users).filter(
            and_(DashBoard.id == dashboard_id, User.chat_id == user_id)).first()
-        if member and task.dashboard_id == dashboard_id:
-
-            return [t.serialize() for t in task.comments], 200
+        try:
+            if member and task.dashboard_id == dashboard_id:
+                return [t.serialize() for t in task.comments], 200
+        except AttributeError:
+            return "Not found", 404
 
         return "Either access is restricted or wrong dashboard", 409
 

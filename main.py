@@ -33,7 +33,8 @@ api.add_resource(
 )
 api.add_resource(
     UserTaskComments,
-    '/users/<int:user_id>/dashboards/<int:dashboard_id>/tasks/<int:task_id>/comments'
+    '/users/<int:user_id>/dashboards/<int:dashboard_id>/tasks/<int:task_id>'
+    '/comments'
 )
 
 if __name__ == '__main__':
