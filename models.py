@@ -1,11 +1,5 @@
 from settings import db
 
-
-# TODO DELETE tasks, comments and users upon deleting a dashboard!
-# TODO create validator
-# TODO solve issues adding a few same rows
-
-
 dashboard_users = db.Table(
     "dashboard_users", db.Model.metadata,
     db.Column("user_id", db.Integer,
@@ -22,6 +16,16 @@ task_users = db.Table(
               db.ForeignKey("tasks.id", ondelete="CASCADE"))
 )
 
+user_subscriptions = db.Table(
+    "user_subscriptions", db.Model.metadata,
+    db.Column("user_id", db.Integer,
+              db.ForeignKey("users.chat_id", ondelete="CASCADE"),
+              primary_key=True),
+    db.Column("event", db.String,
+              db.ForeignKey("events.event", ondelete="CASCADE"),
+              primary_key=True)
+)
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -35,6 +39,9 @@ class User(db.Model):
     tasks = db.relationship('Task', secondary=task_users,
                             backref=db.backref('users', lazy=True))
     comments = db.relationship("Comment", backref='author')
+    subscriptions = db.relationship('Event', secondary=user_subscriptions,
+                                    backref=db.backref("subscribers",
+                                                       lazy=True))
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -101,7 +108,7 @@ class Task(db.Model):
             "admin_name": self.admin_name.username,
             "dashboard_id": self.dashboard_id,
             "dashboard": self.dashboard.dashboard_name,
-            "created at": str(self.created_at),
+            "created_at": self.created_at.strftime("%d-%m-%Y %H:%M:%S"),
             "status": self.status
         }
 
@@ -121,7 +128,7 @@ class Comment(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.now())
 
     def __repr__(self):
-        return '<Comment %r>' % self.id
+        return '<Comment %r>' % self.title
 
     def serialize(self) -> dict:
         return {
@@ -130,7 +137,23 @@ class Comment(db.Model):
             "comment": self.text,
             "sender": self.author.username,
             "task": self.task.task_name,
-            'created_at': str(self.created_at)
+            "created_at": self.created_at.strftime("%d-%m-%Y %H:%M:%S")
+        }
+
+
+class Event(db.Model):
+    __tablename__ = "events"
+
+    id = db.Column(db.Integer, primary_key=True)
+    event = db.Column(db.String(20), nullable=False, unique=True)
+
+    def __repr__(self):
+        return '<Event %r>' % self.event
+
+    def serialize(self) -> dict:
+        return {
+            "id": self.id,
+            "event": self.event
         }
 
 

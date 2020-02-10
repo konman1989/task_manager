@@ -10,7 +10,7 @@ POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 app = Flask(__name__)
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = f'postgresql://konstantin:' \
-                                 f'{POSTGRES_PASSWORD}@localhost/task_manager'
+                                 f'{POSTGRES_PASSWORD}@localhost/test'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)

@@ -33,6 +33,7 @@ class UserTasks(Resource):
                             **data)
                 db.session.add(task)
                 db.session.flush()
+                task.users.append(User.query.get(user_id))
                 id_ = task.id
                 db.session.commit()
 
@@ -137,7 +138,7 @@ class UserTaskComments(Resource):
            and_(DashBoard.id == dashboard_id, User.chat_id == user_id)).first()
         try:
             if member and task.dashboard_id == dashboard_id:
-                return [t.serialize() for t in task.comments], 200
+                return serialize_multiple(task.comments), 200
         except AttributeError:
             return "Not found", 404
 

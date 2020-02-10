@@ -5,6 +5,7 @@ from views.dashboards import Dashboards, SingleDashboard, DashboardUsers, \
 from views.user_dashboards import UserDashboards, UserDashboardsDetailed
 from views.user_tasks import UserTasksDetailed, UserTaskComments, UserTasks
 from views.tasks import Tasks, TaskUsers, TaskComments, TaskCommentsDetailed
+from views.events import Events, UserSubscriptions
 
 api.add_resource(Users, '/users')
 api.add_resource(SingleUser, '/users/<int:user_id>')
@@ -38,6 +39,10 @@ api.add_resource(
     '/users/<int:user_id>/dashboards/<int:dashboard_id>/tasks/<int:task_id>'
     '/comments'
 )
+
+api.add_resource(Events, '/events')
+api.add_resource(UserSubscriptions, '/users/<int:user_id>/subscriptions')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -29,7 +29,7 @@ class DashboardUsers(Resource):
     def get(self, dashboard_id):
         try:
             d = DashBoard.query.get(dashboard_id)
-            return [u.serialize() for u in d.users], 200
+            return serialize_multiple(d.users), 200
         except AttributeError:
             return "Not found", 404
 
@@ -48,7 +48,6 @@ class DashboardUsersDetailed(Resource):
             return 'Not found', 404
         except AttributeError:
             return "Either access is restricted or wrong dashboard", 409
-
 
 
 class DashboardTasks(Resource):
@@ -79,12 +78,14 @@ class DashboardTasks(Resource):
 class DashboardStats(Resource):
 
     def get(self, dashboard_id):
-        d = DashBoard.query.get(dashboard_id)
-        tasks = serialize_multiple(d.tasks)
-        status = [t.get('status') for t in tasks]
+        try:
+            d = DashBoard.query.get(dashboard_id)
+            tasks = serialize_multiple(d.tasks)
+            status = [t.get('status') for t in tasks]
 
-        return {'status': status}
-
+            return {'status': status}, 200
+        except AttributeError:
+            return "Not Found", 404
 
 
 
