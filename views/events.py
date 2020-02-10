@@ -4,7 +4,8 @@ from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import FlushError
 
-from models import User, Event, serialize_multiple, user_subscriptions
+from models import User, Event, serialize_multiple, user_subscriptions, \
+    dashboard_users, task_users
 from utils.validator import ModelValidator
 from settings import db
 
@@ -53,7 +54,7 @@ class UserSubscriptions(Resource):
 
         try:
             event = db.session.query(Event).filter_by(
-                                            event=data.get('event')).first()
+                event=data.get('event')).first()
             event.subscribers.append(User.query.get(user_id))
 
             db.session.commit()
@@ -74,3 +75,29 @@ class UserSubscriptions(Resource):
         db.session.execute(statement)
         db.session.commit()
         return {}, 200
+
+
+class EventSubscribers(Resource):
+    """Returns a list of users subscribed to given event. Filters by dashboard
+    id (notifications about tasks) or task id (notifications about comments)"""
+    def get(self, id_):
+        args = request.args.get('query')
+        if args == 'tasks':
+            users = db.session.query(User).join(
+                dashboard_users).filter(and_(
+                dashboard_users.columns.dashboard_id == id_,
+                user_subscriptions.columns.event == args,
+                user_subscriptions.columns.user_id == dashboard_users.columns.user_id)
+            )
+
+            return serialize_multiple(users.all())
+
+        if args == 'comments':
+            users = db.session.query(User).join(
+                task_users).filter(and_(
+                task_users.columns.task_id == id_,
+                user_subscriptions.columns.event == args,
+                user_subscriptions.columns.user_id == task_users.columns.user_id)
+            )
+
+            return serialize_multiple(users.all())

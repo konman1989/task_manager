@@ -137,6 +137,7 @@ class Comment(db.Model):
             "comment": self.text,
             "sender": self.author.username,
             "task": self.task.task_name,
+            "task_id": self.task_id,
             "created_at": self.created_at.strftime("%d-%m-%Y %H:%M:%S")
         }
 

@@ -5,7 +5,7 @@ from views.dashboards import Dashboards, SingleDashboard, DashboardUsers, \
 from views.user_dashboards import UserDashboards, UserDashboardsDetailed
 from views.user_tasks import UserTasksDetailed, UserTaskComments, UserTasks
 from views.tasks import Tasks, TaskUsers, TaskComments, TaskCommentsDetailed
-from views.events import Events, UserSubscriptions
+from views.events import Events, UserSubscriptions, EventSubscribers
 
 api.add_resource(Users, '/users')
 api.add_resource(SingleUser, '/users/<int:user_id>')
@@ -42,6 +42,7 @@ api.add_resource(
 
 api.add_resource(Events, '/events')
 api.add_resource(UserSubscriptions, '/users/<int:user_id>/subscriptions')
+api.add_resource(EventSubscribers, '/events/<int:id_>/subscribers')
 
 
 if __name__ == '__main__':
