@@ -124,11 +124,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-.idea
+
 
 # Other files
 /routs.txt
 /scratch.py
 /lesson.py
+
+.idea
 
 
