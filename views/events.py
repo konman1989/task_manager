@@ -40,9 +40,6 @@ class UserSubscriptions(Resource):
             return "Not Found", 404
 
     def post(self, user_id):
-        """Explicitly adding user to subscriptions table to check if user
-        already subscribed"""
-
         data = request.get_json()
 
         event_exists = Event.query.join(User, Event.subscribers).filter(
@@ -80,6 +77,7 @@ class UserSubscriptions(Resource):
 class EventSubscribers(Resource):
     """Returns a list of users subscribed to given event. Filters by dashboard
     id (notifications about tasks) or task id (notifications about comments)"""
+
     def get(self, id_):
         args = request.args.get('query')
         if args == 'tasks':

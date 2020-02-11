@@ -7,6 +7,7 @@ from views.user_tasks import UserTasksDetailed, UserTaskComments, UserTasks
 from views.tasks import Tasks, TaskUsers, TaskComments, TaskCommentsDetailed
 from views.events import Events, UserSubscriptions, EventSubscribers
 
+
 api.add_resource(Users, '/users')
 api.add_resource(SingleUser, '/users/<int:user_id>')
 api.add_resource(UserStats, '/users/<int:user_id>/data')

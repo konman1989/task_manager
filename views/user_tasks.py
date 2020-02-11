@@ -105,6 +105,10 @@ class UserTasksDetailed(Resource):
                     return "Wrong dashboard", 409
 
                 task.update(data)
+                # sending a task change status notification
+                if data.get('status'):
+                    init_event_creation('status', task.first().serialize())
+
                 db.session.commit()
                 return {}, 204
             except AttributeError:

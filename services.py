@@ -5,14 +5,14 @@ from typing import NamedTuple
 
 class Message(NamedTuple):
     event_name: str
-    event: str
+    event: dict
 
 
 def init_event_creation(name: str, event: dict) -> None:
     message = Message(event_name=name, event=event)
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host='127.0.0.1'))
-    print(event)
+
     channel = connection.channel()
 
     channel.queue_declare(queue='message')
