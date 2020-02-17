@@ -1,6 +1,9 @@
 import json
+import os
 import pika
 from typing import NamedTuple
+
+HOST = os.getenv('SERVER_IP_HOST')
 
 
 class Message(NamedTuple):
@@ -11,7 +14,7 @@ class Message(NamedTuple):
 def init_event_creation(name: str, event: dict) -> None:
     message = Message(event_name=name, event=event)
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='127.0.0.1'))
+        pika.ConnectionParameters(host=HOST))
 
     channel = connection.channel()
 
