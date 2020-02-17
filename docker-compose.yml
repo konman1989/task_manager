@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  app:
+    restart: always
+    build: .
+    image: konman1989/task_manager:latest
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_DEBUG=1
+    ports:
+      - 5000:5000
+    depends_on:
+      - rabbit
+    volumes:
+      - .:/app
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+
+
+#    depends_on:
+#      - postgres
+#    entrypoint: ["python", "main.py"]
+#
+#  postgres:
+#    restart: always
+#    image: postgres:latest
+#    environment:
+#      - POSTGRES_USER=${POSTGRES_USER}
+#      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+#      - POSTGRES_DB=${POSTGRES_DB}
+#    volumes:
+#      - ./postgres-data/postgres:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+
