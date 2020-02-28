@@ -13,7 +13,16 @@ app.config[
     'SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:' \
                                  f'{POSTGRES_PASSWORD}@{POSTGRES_URL}/postgres'
 
+# for testing purposes only
+# app.config[
+#     'SQLALCHEMY_DATABASE_URI'] = f'postgresql://konstantin:' \
+#                                  f'{POSTGRES_PASSWORD}@localhost/test_db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
+
+
 db = SQLAlchemy(app)
 api = Api(app)
 
