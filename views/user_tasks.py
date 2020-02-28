@@ -1,6 +1,7 @@
 from flask import request
 from flask_restful import Resource
 from sqlalchemy import and_
+from sqlalchemy.exc import InvalidRequestError
 
 from models import User, DashBoard, Task, Comment, serialize_multiple
 from services import init_event_creation
@@ -67,6 +68,8 @@ class UserTasksDetailed(Resource):
         member"""
 
         data = request.get_json()
+        if data is None:
+            return "Wrong input", 400
         task = Task.query.get(task_id)
         user = User.query.get(data.get('team'))
 
@@ -97,20 +100,23 @@ class UserTasksDetailed(Resource):
                 task = db.session.query(Task).filter_by(id=task_id)
 
                 if data.get('admin') is not None and \
-                        task.first().admin_id != data.get('admin') \
-                        and user_id != task.first().admin_id:
+                        task.first().admin != data.get('admin') \
+                        and user_id != task.first().admin:
                     return "Only task admins can change admins", 409
 
                 if task.first().dashboard_id != dashboard_id:
                     return "Wrong dashboard", 409
 
                 task.update(data)
+
                 # sending a task change status notification
                 if data.get('status'):
                     init_event_creation('status', task.first().serialize())
 
                 db.session.commit()
                 return {}, 204
+            except InvalidRequestError:
+                return 'Wrong input', 400
             except AttributeError:
                 return 'Not found', 404
         return 'Only dashboard members can manipulate tasks', 409
@@ -118,6 +124,8 @@ class UserTasksDetailed(Resource):
     def delete(self, user_id, dashboard_id, task_id):
         task = Task.query.get(task_id)
 
+        if task is None:
+            return 'Not found', 404
         member = DashBoard.query.join(User, DashBoard.users).filter(
             and_(DashBoard.id == dashboard_id,
                  User.chat_id == user_id)).first()
